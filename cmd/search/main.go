@@ -11,7 +11,11 @@ import (
 func main() {
 	spider := spider.New()
 	arr := []string{"https://go.dev", "https://golang.org"}
-	docs, _ := mergeScan(spider, arr, 2)
+	docs, err := mergeScan(spider, arr, 2)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	search := flag.String("s", "", "search for keyword")
 	flag.Parse()
@@ -22,9 +26,19 @@ func main() {
 }
 
 func mergeScan(s *spider.Service, urls []string, lvl int) ([]crawler.Document, error) {
-	res, _ := s.Scan(urls[0], lvl)
+	res, err := s.Scan(urls[0], lvl)
+
+	if err != nil {
+		return nil, err
+	}
+
 	for _, url := range urls[1:] {
-		i, _ := s.Scan(url, lvl)
+		i, err := s.Scan(url, lvl)
+
+		if err != nil {
+			return nil, err
+		}
+
 		res = append(res, i...)
 	}
 
