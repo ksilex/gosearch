@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"parser/pkg/crawler"
-	"parser/pkg/crawler/spider"
-	"parser/pkg/index"
+	"parser/lesson_4/pkg/crawler"
+	"parser/lesson_4/pkg/crawler/spider"
+	"parser/lesson_4/pkg/index"
 	"sort"
 )
 
@@ -20,7 +20,6 @@ func main() {
 	docs := []crawler.Document{}
 
 	f, err := os.Open(filename)
-	defer f.Close()
 	if err != nil {
 		docs, err = mergeScan(spider, arr, 2)
 		if err != nil {
@@ -28,11 +27,11 @@ func main() {
 			return
 		}
 		f, err := os.Create(filename)
-		defer f.Close()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
+		defer f.Close()
 		err = store(f, docs)
 		if err != nil {
 			fmt.Println(err)
@@ -44,6 +43,8 @@ func main() {
 			return
 		}
 	}
+	defer f.Close()
+
 	idx := index.New()
 	for _, doc := range docs {
 		idx.Add(doc.Title, doc.ID)
@@ -65,11 +66,7 @@ func main() {
 }
 
 func store(w io.Writer, docs []crawler.Document) error {
-	enc := gob.NewEncoder(w)
-	if err := enc.Encode(docs); err != nil {
-		return err
-	}
-	return nil
+	return gob.NewEncoder(w).Encode(docs)
 }
 
 func load(r io.Reader) (docs []crawler.Document, err error) {
